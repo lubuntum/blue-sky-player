@@ -1,19 +1,20 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth-service';
 import { LoginRequest } from '../../../models/auth/login-request.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
-  imports: [],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
 export class Login {
   loginForm: FormGroup
   isLoading = false
-  errorMsg = ''
+  errorMessage = ''
 
   constructor(
     private fb: FormBuilder,
@@ -25,10 +26,12 @@ export class Login {
       password: ['', [Validators.required, Validators.minLength(6)]]
     })
   }
-  onSumbit(): void {
+  get email() { return this.loginForm.get('email') }
+  get password() { return this.loginForm.get('password') }
+  onSubmit(): void {
     if (!this.loginForm.valid) return 
     this.isLoading = true
-    this.errorMsg = ""
+    this.errorMessage = ""
 
     const credentials: LoginRequest = this.loginForm.value
     this.authService.login(credentials).subscribe({
@@ -36,7 +39,7 @@ export class Login {
         this.router.navigate(['/home'])
       },
       error: (error) => {
-        this.errorMsg = error.error?.message || "Login failed"
+        this.errorMessage = error.error?.message || "Login failed"
         this.isLoading = false
       },
       complete: () => {
